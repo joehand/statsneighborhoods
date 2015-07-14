@@ -14,7 +14,7 @@
     - Mutual Information
 
     :copyright: (c) 2014-2015 by Joe Hand, Santa Fe Institute.
-    :license:
+    :license: MIT
 """
 
 from functools import wraps
@@ -23,7 +23,9 @@ from pandas import DataFrame, Series, concat
 from scipy import stats
 import numpy as np
 
+
 class CensusFrame(DataFrame):
+
     """ Extends Pandas DataFrame for Information Theory Calculations!
         This class takes input data and exposes three main functions:
         - Entropy Calculation
@@ -45,10 +47,10 @@ class CensusFrame(DataFrame):
     --------
     """
 
-    LOG_BASE = 2 # Log Base for Entropy/Information Calculations
+    LOG_BASE = 2  # Log Base for Entropy/Information Calculations
 
     def __init__(self, bin_regex='^ACSHINC([0-9])+$', tot_col='ACSTOTHH',
-                        group_col='CITY_NAME', group_name='CITY', **kwargs):
+                 group_col='CITY_NAME', group_name='CITY', **kwargs):
 
         DataFrame.__init__(self, **kwargs)
 
@@ -58,9 +60,8 @@ class CensusFrame(DataFrame):
         # used to for column suffix
         self.group_name = group_name
 
-        #TODO: where should i keep track of these DFs?
+        # TODO: where should i keep track of these DFs?
         self.nhood_df = self.copy()
-
 
     def _filter(self, df=None, regex=None):
         """ Returns a filtered df using regex.
@@ -76,7 +77,7 @@ class CensusFrame(DataFrame):
         """ Return a grouped df using self.group_col
             Stores grouped df for later use
         """
-        if hasattr(self,'grouped'):
+        if hasattr(self, 'grouped'):
             return self.grouped
         self.grouped = self.groupby(self.group_col)
         return self.grouped
@@ -98,38 +99,38 @@ class CensusFrame(DataFrame):
         """
         @wraps(f)
         def wrapper(self, *args, **kwargs):
-            #wrapped function must return the new DF/Series
+            # wrapped function must return the new DF/Series
             new_df = f(self, *args, **kwargs)
 
             if len(new_df) == len(self.nhood_df):
                 nhood = True
                 df_name = 'nhood_df'
             else:
-                #TODO: HACK!!!! How to tell nbhood df vs citydf
+                # TODO: HACK!!!! How to tell nbhood df vs citydf
                 if not hasattr(self, 'city_df') and len(new_df) < 10000:
                     setattr(self, 'city_df', new_df)
-                    return getattr(self,'city_df')
+                    return getattr(self, 'city_df')
                 elif len(new_df) == len(self.city_df):
                     nhood = False
                     df_name = 'city_df'
                 else:
-                    #TODO: Fall back on this by default. Another HACK.
+                    # TODO: Fall back on this by default. Another HACK.
                     nhood = True
                     df_name = 'nhood_df'
 
-            df = getattr(self,df_name)
+            df = getattr(self, df_name)
 
             # old cols that don't need replacing
-            old_cols =  df.columns.difference(new_df.columns)
+            old_cols = df.columns.difference(new_df.columns)
 
             # This overwrites matching columns with NEW DATA!!!
             try:
                 setattr(self, df_name,
-                            df[old_cols.tolist()].join(new_df, how='outer'))
+                        df[old_cols.tolist()].join(new_df, how='outer'))
             except:
-                #TODO: Real try/except
+                # TODO: Real try/except
                 raise Exception
-            return new_df #TODO: or do we want to return full DF?
+            return new_df  # TODO: or do we want to return full DF?
         return wrapper
 
     def _entropy(self, *args):
@@ -139,7 +140,7 @@ class CensusFrame(DataFrame):
     def weighted_mean(self, val_col_name, wt_col_name):
         def inner(group):
             return (group[val_col_name] *
-                        (group[wt_col_name]/group[wt_col_name].mean())).mean()
+                    (group[wt_col_name]/group[wt_col_name].mean())).mean()
         inner.__name__ = 'weighted_mean'
         return inner
 
@@ -147,7 +148,7 @@ class CensusFrame(DataFrame):
         def inner(group):
             if log:
                 return np.log((group[val_col_name] *
-                        (group[wt_col_name]/group[wt_col_name].mean()))).var()
+                               (group[wt_col_name]/group[wt_col_name].mean()))).var()
             else:
                 return (group[val_col_name] *
                         (group[wt_col_name]/group[wt_col_name].mean())).var()
@@ -179,12 +180,12 @@ class CensusFrame(DataFrame):
             #    % of mean population (e.g. block_pop / nyc_mean_block_pop)
             for var in var_list:
                 df_grouped[var + '_weighted'] = self._grouped().apply(
-                        self.weighted_mean(var, self.tot_col))
+                    self.weighted_mean(var, self.tot_col))
         return df_grouped
 
     @_append_to_df
     def calculate_group_variance(self, weighted=True,
-                                    var_list=[], var_regex=None, **kwargs):
+                                 var_list=[], var_regex=None, **kwargs):
         """ Calculates mean/adjusted mean for each group
             Adjustement uses population variable to properly adjust means
         """
@@ -193,15 +194,15 @@ class CensusFrame(DataFrame):
         if var_regex:
             var_list.extend(self._filter(regex=var_regex).columns.values)
         df_grouped = self._grouped()[var_list].var()
-        df_grouped = df_grouped.rename(columns={var:var+'_variance' for var in var_list})
+        df_grouped = df_grouped.rename(
+            columns={var: var+'_variance' for var in var_list})
         if weighted:
             # Adjust by multiplying each row value
             #   by % of mean population (e.g. block_pop / nyc_mean_block_pop)
             for var in var_list:
                 df_grouped[var + '_weighted_var'] = self._grouped().apply(
-                        self.weighted_variance(var, self.tot_col, **kwargs))
+                    self.weighted_variance(var, self.tot_col, **kwargs))
         return df_grouped
-
 
     @_append_to_df
     def p_n(self):
@@ -212,10 +213,11 @@ class CensusFrame(DataFrame):
         -------
         p(n) : DataFrame
         """
-        df = self._join_group_sums(regex=self.tot_col) # DF w/ sums across group
+        df = self._join_group_sums(
+            regex=self.tot_col)  # DF w/ sums across group
 
         p_n = df[self.tot_col]/df[self.tot_col + '_' + self.group_name]
-        self.p_n = DataFrame({'p(n)':p_n}, index=df.index)
+        self.p_n = DataFrame({'p(n)': p_n}, index=df.index)
         return self.p_n
 
     @_append_to_df
@@ -255,14 +257,15 @@ class CensusFrame(DataFrame):
         if conditional:
             # Returns same number of rows of data as original DF
             df = self._filter()
-            H = self._entropy(df.transpose()) # Entropy of y bins for each row
-            self.H_y_n = DataFrame({'H(y|n)':H}, index=df.index)
+            H = self._entropy(df.transpose())  # Entropy of y bins for each row
+            self.H_y_n = DataFrame({'H(y|n)': H}, index=df.index)
             return self.H_y_n
         else:
             # Returns len(groups) rows of data
             df_grouped = self._filter(df=self._grouped().sum())
-            H = self._entropy(df_grouped.transpose()) # Entropy of y bins for each group
-            self.H_y = DataFrame({'H(y)':H}, index=df_grouped.index)
+            # Entropy of y bins for each group
+            H = self._entropy(df_grouped.transpose())
+            self.H_y = DataFrame({'H(y)': H}, index=df_grouped.index)
             return self.H_y
 
     @_append_to_df
@@ -274,13 +277,15 @@ class CensusFrame(DataFrame):
         -------
         KL Divergence : DataFrame
         """
-        df = self._filter() # DF with just y bins
+        df = self._filter()  # DF with just y bins
 
-        regex = self.bin_regex[:-1] + '_' + self.group_name # Regex to get group columns
-        df_city = self._filter(df = self._join_group_sums(), regex=regex) # DF w/ sums across group
+        # Regex to get group columns
+        regex = self.bin_regex[:-1] + '_' + self.group_name
+        # DF w/ sums across group
+        df_city = self._filter(df=self._join_group_sums(), regex=regex)
         # Calcuate conditional entropy/DKL
         DKL = self._entropy(df.transpose(), df_city.transpose())
-        self.DKL_y = DataFrame({'DKL(y|n)':DKL}, index=df.index)
+        self.DKL_y = DataFrame({'DKL(y|n)': DKL}, index=df.index)
         return self.DKL_y
 
     @_append_to_df
@@ -304,11 +309,13 @@ class CensusFrame(DataFrame):
         bin_num = len(cols)
         for name, group in self._grouped():
             group_tot = group[self.tot_col].sum()
-            p_n = DataFrame([group[self.tot_col]/group_tot]*bin_num).transpose()
+            p_n = DataFrame(
+                [group[self.tot_col]/group_tot]*bin_num).transpose()
             H_n = Series(self._entropy(p_n)[0], index=['H(n)'], name=name)
 
             group_filtered = self._filter(df=group)
-            H_n_y = Series(self._entropy(group_filtered), index=cols, name=name)
+            H_n_y = Series(
+                self._entropy(group_filtered), index=cols, name=name)
             H_n_y.index = ['H(n|y)_' + str(item) for item in H_n_y.index]
 
             if calc_dkl:
@@ -320,7 +327,8 @@ class CensusFrame(DataFrame):
         self.H_n = DataFrame(df_city)
         if calc_dkl:
             self.DKL_n = DataFrame(df_city_dkl)
-            return concat([self.H_n, self.DKL_n], axis=1) # Return all the data
+            # Return all the data
+            return concat([self.H_n, self.DKL_n], axis=1)
         return self.H_n
 
     def _dkl_n_group(self, group_df, name, cols, p_n):
@@ -338,7 +346,7 @@ class CensusFrame(DataFrame):
         DKL_n : Series
         """
         DKL_n = Series(self._entropy(group_df, p_n), index=cols, name=name)
-        DKL_n.index = ['DKL(n|y)_' + str(item) for item in  DKL_n.index]
+        DKL_n.index = ['DKL(n|y)_' + str(item) for item in DKL_n.index]
         return DKL_n
 
     @_append_to_df
@@ -358,7 +366,8 @@ class CensusFrame(DataFrame):
         bin_num = len(cols)
         for name, group in self._grouped():
             group_tot = group[self.tot_col].sum()
-            p_n = DataFrame([group[self.tot_col]/group_tot]*bin_num).transpose()
+            p_n = DataFrame(
+                [group[self.tot_col]/group_tot]*bin_num).transpose()
 
             group_filtered = self._filter(df=group)
             DKL_n = self._dkl_n_group(group_filtered, name, cols, p_n)
@@ -380,7 +389,8 @@ class CensusFrame(DataFrame):
         """
         #
         grouped_sum = self._grouped().sum()
-        N_l = self._filter(df=grouped_sum).div(grouped_sum[self.tot_col], axis='index').values
+        N_l = self._filter(df=grouped_sum).div(
+            grouped_sum[self.tot_col], axis='index').values
         DKL = self.dkl_n().values
 
         MI = DataFrame(N_l*DKL, index=self.DKL_n.index).sum(axis=1)
