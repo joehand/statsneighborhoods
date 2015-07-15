@@ -2,13 +2,16 @@
 """
     cumulant calculations
     ~~~~~~~~~
+    Uses integral of histogram as calculation for cumulants/moments.
+    https://en.wikipedia.org/wiki/Cumulant
 
     :copyright: (c) 2015 by Joe Hand, Santa Fe Institute.
     :license: MIT
 """
-from pandas import DataFrame
-import scipy.stats as st
+
 import numpy as np
+from pandas import DataFrame
+from scipy import stats
 
 
 def _bin_area(count, bin_edges):
@@ -97,12 +100,15 @@ def cumulant_hist(hist_data, bin_edges, n=1, satndardized=False):
 
 
 def cumulant(data, n=1, standardized=False):
+    """ Calculates cumulants with moments from scipy.stats package.
+        Scipy.stats doesn't use histogram method.
+    """
     if n > 6 or n < 1:
         raise ValueError("cumulants only supported for 1<=n<=6")
     n = int(n)
     mu = {}
     for k in range(1, n+1):
-        mu[k] = st.moment(data, moment=k)
+        mu[k] = stats.moment(data, moment=k)
         if k > 2:
             mu[k] = mu[k]
     if standardized and n > 2:

@@ -19,9 +19,9 @@
 
 from functools import wraps
 
-from pandas import DataFrame, Series, concat
-from scipy import stats
 import numpy as np
+from pandas import concat, DataFrame, Series
+from scipy import stats
 
 
 class CensusFrame(DataFrame):
@@ -52,7 +52,7 @@ class CensusFrame(DataFrame):
     def __init__(self, bin_regex='^ACSHINC([0-9])+$', tot_col='ACSTOTHH',
                  group_col='CITY_NAME', group_name='CITY', **kwargs):
 
-        DataFrame.__init__(self, **kwargs)
+        super(CensusFrame, self).__init__(**kwargs)
 
         self.bin_regex = bin_regex
         self.tot_col = tot_col
@@ -106,7 +106,7 @@ class CensusFrame(DataFrame):
                 nhood = True
                 df_name = 'nhood_df'
             else:
-                # TODO: HACK!!!! How to tell nbhood df vs citydf
+                # TODO: HACK!!!! How to tell nhood df vs citydf
                 if not hasattr(self, 'city_df') and len(new_df) < 10000:
                     setattr(self, 'city_df', new_df)
                     return getattr(self, 'city_df')
@@ -396,3 +396,22 @@ class CensusFrame(DataFrame):
         MI = DataFrame(N_l*DKL, index=self.DKL_n.index).sum(axis=1)
         self.MI = DataFrame(MI, index=self.DKL_n.index, columns=['MI'])
         return self.MI
+
+
+def information_calculations(df, funcs=[**kwargs):
+    """ This will populate the dataframe with information theory measures.
+        TODO: clean this up.
+        - What variables do I need here?
+        - Do I need to call all these by default?
+    """
+    cf = CensusFrame(df)
+    cf.calculate_group_sums(**kwargs)
+    cf.calculate_group_means(var_list=['ACSAVGHINC'])
+    cf.nhood_weights()
+    cf.dkl_y()
+    cf.entropy_y()
+    cf.entropy_y(conditional=False)
+    cf.entropy_n()
+    cf.mutual_info()
+
+    return cf
