@@ -138,6 +138,10 @@ class CensusFrame(DataFrame):
         return stats.entropy(*args, base=self.LOG_BASE)
 
     def weighted_mean(self, val_col_name, wt_col_name):
+        """ Weight the mean of a column by another column.
+            e.g. weight income by population column.
+            this allows calculations across neighborhoods to be consistent.
+        """
         def inner(group):
             return (group[val_col_name] *
                     (group[wt_col_name]/group[wt_col_name].mean())).mean()
