@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    neighborhood information
+    neighborhood information theory
     ~~~~~~~~~
 
     The module calculates various information theory metrics about census-like data.
@@ -236,9 +236,12 @@ class CensusFrame(DataFrame):
         regex = self.tot_col + '|' + self.bin_regex
         df = self._join_group_sums(regex=regex)
         nhood_total = df[self.tot_col]
-        city_total = df[self.tot_col + '_CITY']
+        city_total = df[self.tot_col + '_' + self.group_name]
         for col in df.filter(regex=self.bin_regex).columns:
-            df[col+'_W'] = (df[col]/nhood_total)/(df[col+'_CITY']/city_total)
+            df[col+'_W'] = (
+                (df[col]/nhood_total) /
+                (df[col + '_' + self.group_name]/city_total)
+            )
         self.df_w = df.filter(regex='_W$').replace([np.inf, -np.inf], np.nan)
         return self.df_w
 
@@ -400,22 +403,3 @@ class CensusFrame(DataFrame):
         MI = DataFrame(N_l*DKL, index=self.DKL_n.index).sum(axis=1)
         self.MI = DataFrame(MI, index=self.DKL_n.index, columns=['MI'])
         return self.MI
-
-
-def information_calculations(df, funcs=[**kwargs):
-    """ This will populate the dataframe with information theory measures.
-        TODO: clean this up.
-        - What variables do I need here?
-        - Do I need to call all these by default?
-    """
-    cf = CensusFrame(df)
-    cf.calculate_group_sums(**kwargs)
-    cf.calculate_group_means(var_list=['ACSAVGHINC'])
-    cf.nhood_weights()
-    cf.dkl_y()
-    cf.entropy_y()
-    cf.entropy_y(conditional=False)
-    cf.entropy_n()
-    cf.mutual_info()
-
-    return cf

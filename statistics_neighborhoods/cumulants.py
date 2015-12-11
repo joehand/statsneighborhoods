@@ -96,7 +96,7 @@ def cumulant_hist(hist_data, bin_edges, n=1, satndardized=False):
     elif n == 6:
         return mu[6] - 15 * mu[4] * mu[2] - 10 * mu[3]**2 + 30 * mu[2]**3
     else:
-        raise ValueError("Should not be here.")
+        raise ValueError("I only added up to the sixth moment so far.")
 
 
 def cumulant(data, n=1, standardized=False):
