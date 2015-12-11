@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    neighborhood information
+    neighborhood information theory
     ~~~~~~~~~
 
     The module calculates various information theory metrics about census-like data.
@@ -19,9 +19,9 @@
 
 from functools import wraps
 
-from pandas import DataFrame, Series, concat
-from scipy import stats
 import numpy as np
+from pandas import concat, DataFrame, Series
+from scipy import stats
 
 
 class CensusFrame(DataFrame):
@@ -52,7 +52,7 @@ class CensusFrame(DataFrame):
     def __init__(self, bin_regex='^ACSHINC([0-9])+$', tot_col='ACSTOTHH',
                  group_col='CITY_NAME', group_name='CITY', **kwargs):
 
-        DataFrame.__init__(self, **kwargs)
+        super(CensusFrame, self).__init__(**kwargs)
 
         self.bin_regex = bin_regex
         self.tot_col = tot_col
@@ -106,7 +106,7 @@ class CensusFrame(DataFrame):
                 nhood = True
                 df_name = 'nhood_df'
             else:
-                # TODO: HACK!!!! How to tell nbhood df vs citydf
+                # TODO: HACK!!!! How to tell nhood df vs citydf
                 if not hasattr(self, 'city_df') and len(new_df) < 10000:
                     setattr(self, 'city_df', new_df)
                     return getattr(self, 'city_df')
@@ -138,6 +138,10 @@ class CensusFrame(DataFrame):
         return stats.entropy(*args, base=self.LOG_BASE)
 
     def weighted_mean(self, val_col_name, wt_col_name):
+        """ Weight the mean of a column by another column.
+            e.g. weight income by population column.
+            this allows calculations across neighborhoods to be consistent.
+        """
         def inner(group):
             return (group[val_col_name] *
                     (group[wt_col_name]/group[wt_col_name].mean())).mean()
@@ -232,9 +236,12 @@ class CensusFrame(DataFrame):
         regex = self.tot_col + '|' + self.bin_regex
         df = self._join_group_sums(regex=regex)
         nhood_total = df[self.tot_col]
-        city_total = df[self.tot_col + '_CITY']
+        city_total = df[self.tot_col + '_' + self.group_name]
         for col in df.filter(regex=self.bin_regex).columns:
-            df[col+'_W'] = (df[col]/nhood_total)/(df[col+'_CITY']/city_total)
+            df[col+'_W'] = (
+                (df[col]/nhood_total) /
+                (df[col + '_' + self.group_name]/city_total)
+            )
         self.df_w = df.filter(regex='_W$').replace([np.inf, -np.inf], np.nan)
         return self.df_w
 

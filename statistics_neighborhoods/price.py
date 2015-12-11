@@ -6,9 +6,9 @@
     :copyright: (c) 2015 by Joe Hand, Santa Fe Institute.
     :license: MIT
 """
-from pandas import DataFrame, Series, concat
-from scipy import stats
 import numpy as np
+from pandas import concat, DataFrame, Series
+from scipy import stats
 
 
 LOW_BINS = [0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000,
