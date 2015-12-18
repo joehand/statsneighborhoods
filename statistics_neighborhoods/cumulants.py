@@ -5,6 +5,8 @@
     Uses integral of histogram as calculation for cumulants/moments.
     https://en.wikipedia.org/wiki/Cumulant
 
+    This should work for any regular histogram data.
+
     :copyright: (c) 2015 by Joe Hand, Santa Fe Institute.
     :license: MIT
 """
@@ -96,7 +98,7 @@ def cumulant_hist(hist_data, bin_edges, n=1, satndardized=False):
     elif n == 6:
         return mu[6] - 15 * mu[4] * mu[2] - 10 * mu[3]**2 + 30 * mu[2]**3
     else:
-        raise ValueError("I only added up to the sixth moment so far.")
+        raise ValueError("Only supports up to the sixth moment currently.")
 
 
 def cumulant(data, n=1, standardized=False):

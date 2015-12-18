@@ -45,6 +45,14 @@ class CensusFrame(DataFrame):
 
     Examples
     --------
+    cf = CensusFrame(
+            data=df,
+            bin_regex=bin_regex,
+            group_col='CITY_NAME',
+            tot_col='TOTPOP',
+        )
+    cf.dkl_y() # call one of the calculation functions
+    cf.nhood_df['DKL(y|n)']
     """
 
     LOG_BASE = 2  # Log Base for Entropy/Information Calculations

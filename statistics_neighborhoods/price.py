@@ -2,6 +2,10 @@
 """
     price calculations
     ~~~~~~~~~
+    WARNING: This is specific to US income data.
+
+    If this needs to be changed,
+    you will need to update the BINS values and some of the regex expressions.
 
     :copyright: (c) 2015 by Joe Hand, Santa Fe Institute.
     :license: MIT
