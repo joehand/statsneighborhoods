@@ -2,7 +2,7 @@ from setuptools import setup
 from statistics_neighborhoods import __version__
 
 setup(
-    name='statistics_neighborhoods',
+    name='statsneighborhoods',
     version=__version__,
     description='Census Information Theory Calculations for Neighborhoods',
     long_description=open('readme.md').read(),
