@@ -14,9 +14,9 @@ setup(
     download_url= 'https://github.com/SFI-Cities/statistics-neighborhoods',
     packages=[],
     install_requires=[
-        numpy>=1.9.2,
-        pandas>=0.16.2,
-        scipy>=0.15.1,
+        numpy,
+        pandas,
+        scipy,
     ],
     entry_points={
         'console_scripts': []
