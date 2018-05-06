@@ -1,5 +1,5 @@
 from setuptools import setup
-from statistics_neighborhoods import __version__
+from statsneighborhoods import __version__
 
 setup(
     name='statsneighborhoods',
