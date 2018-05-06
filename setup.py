@@ -13,11 +13,11 @@ setup(
     license='MIT',
     download_url= 'https://github.com/SFI-Cities/statistics-neighborhoods',
     packages=[],
-    install_requires=[
-        numpy,
-        pandas,
-        scipy,
-    ],
+#     install_requires=[
+#         numpy,
+#         pandas,
+#         scipy,
+#     ],
     entry_points={
         'console_scripts': []
     },
