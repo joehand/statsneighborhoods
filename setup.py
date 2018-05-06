@@ -9,9 +9,9 @@ setup(
     keywords='census information-theory python',
     author='Joe Hand',
     author_email='joe.a.hand@gmail.com',
-    url='https://github.com/SFI-Cities/statistics-neighborhoods',
+    url='https://github.com/joehand/statisticsneighborhoods',
     license='MIT',
-    download_url= 'https://github.com/SFI-Cities/statistics-neighborhoods',
+    download_url= 'https://github.com/joehand/statisticsneighborhoods',
     packages=[],
 #     install_requires=[
 #         numpy,
