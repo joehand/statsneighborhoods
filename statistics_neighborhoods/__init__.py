@@ -9,4 +9,4 @@
 
 __version__ = '0.0.1'
 
-from statistics_neighborhoods.information import CensusFrame
+from statsneighborhoods.information import CensusFrame
