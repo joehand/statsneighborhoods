@@ -9,9 +9,9 @@ setup(
     keywords='census information-theory python',
     author='Joe Hand',
     author_email='joe.a.hand@gmail.com',
-    url='https://github.com/joehand/statisticsneighborhoods',
+    url='https://github.com/joehand/statistics_neighborhoods',
     license='MIT',
-    download_url= 'https://github.com/joehand/statisticsneighborhoods',
+    download_url= 'https://github.com/joehand/statistics_neighborhoods',
     packages=[],
 #     install_requires=[
 #         numpy,
